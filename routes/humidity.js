@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Humidity = require('../models/humidityModel');
-const moment = require('moment');
+const moment = require('moment-timezone');
 
 router.get('/', async (req, res) => {
 	try {
@@ -9,8 +9,12 @@ router.get('/', async (req, res) => {
 		const formattedHumidity = humidity.map((doc) => {
 			return {
 				...doc._doc,
-				createdAt: moment(doc.createdAt).format('YYYY-MM-DD HH:mm:ss'),
-				updatedAt: moment(doc.updatedAt).format('YYYY-MM-DD HH:mm:ss')
+				createdAt: moment(doc.createdAt)
+					.tz('Asia/Manila')
+					.format('YYYY-MM-DD HH:mm:ss'),
+				updatedAt: moment(doc.updatedAt)
+					.tz('Asia/Manila')
+					.format('YYYY-MM-DD HH:mm:ss')
 			};
 		});
 		res.status(200).json(formattedHumidity);
