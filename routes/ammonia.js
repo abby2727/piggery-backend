@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const Ammonia = require('../models/ammoniaModel');
 const moment = require('moment-timezone');
+const webpush = require('web-push');
+
+const Ammonia = require('../models/ammoniaModel');
+const Subscription = require('../models/subscriptionModel');
 
 router.get('/', async (req, res) => {
 	try {
@@ -28,6 +31,21 @@ router.post('/', async (req, res) => {
 	try {
 		const { value } = req.body;
 		if (!value) res.status(400).json({ message: 'Please provide a value' });
+
+		//* Send notification if ammonia level is above 25
+		if (value > 25) {
+			console.log('Ammonia level is above normal.');
+
+			const subscriptions = await Subscription.find();
+			const notifications = subscriptions.map((subscription) =>
+				webpush.sendNotification(
+					subscription,
+					'Ammonia level is above normal.'
+				)
+			);
+
+			await Promise.all(notifications);
+		}
 
 		const ammonia = await Ammonia.create({ value });
 		res.status(201).json(ammonia);
