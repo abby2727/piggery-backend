@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const Temperature = require('../models/temperatureModel');
 const moment = require('moment-timezone');
+const webpush = require('web-push');
+
+const Temperature = require('../models/temperatureModel');
+const Subscription = require('../models/subscriptionModel');
 
 router.get('/', async (req, res) => {
 	try {
@@ -28,6 +31,33 @@ router.post('/', async (req, res) => {
 	try {
 		const { value } = req.body;
 		if (!value) res.status(400).json({ message: 'Please provide a value' });
+
+		//* Send notification if temperature level is above 26 degree C
+		if (value > 26) {
+			console.log('Temperature level is above normal.');
+
+			const dateAndTime = moment()
+				.tz('Asia/Manila')
+				.format('MMMM Do YYYY, h:mm a');
+			const message = `Temperature level is above normal. Date and Time: ${dateAndTime}`;
+
+			const subscriptions = await Subscription.find();
+			const notifications = subscriptions.map(async (subscription) => {
+				try {
+					await webpush.sendNotification(subscription, message);
+				} catch (err) {
+					if (err.statusCode === 410 || err.statusCode === 404) {
+						// The push subscription was not found or has expired.
+						// Remove the subscription from the database.
+						await Subscription.deleteOne({ _id: subscription._id });
+					} else {
+						console.error('Failed to send notification', err);
+					}
+				}
+			});
+
+			await Promise.all(notifications);
+		}
 
 		const temperature = await Temperature.create({ value });
 		res.status(201).json(temperature);
