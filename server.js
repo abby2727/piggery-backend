@@ -2,7 +2,6 @@ const express = require('express');
 const dotenv = require('dotenv').config();
 const connectDb = require('./config/dbConnection');
 const cors = require('cors');
-const webpush = require('web-push');
 
 const app = express();
 app.use(express.json());
