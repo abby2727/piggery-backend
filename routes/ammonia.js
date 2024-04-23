@@ -36,13 +36,13 @@ router.post('/', async (req, res) => {
 		if (value > 25) {
 			console.log('Ammonia level is above normal.');
 
+			const dateAndTime = moment().format('MMMM Do YYYY, h:mm a');
+			const message = `Ammonia level is above normal. Date and Time: ${dateAndTime}`;
+
 			const subscriptions = await Subscription.find();
 			const notifications = subscriptions.map(async (subscription) => {
 				try {
-					await webpush.sendNotification(
-						subscription,
-						'Ammonia level is above normal.'
-					);
+					await webpush.sendNotification(subscription, message);
 				} catch (err) {
 					if (err.statusCode === 410 || err.statusCode === 404) {
 						// The push subscription was not found or has expired.
