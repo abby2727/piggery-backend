@@ -37,12 +37,22 @@ router.post('/', async (req, res) => {
 			console.log('Ammonia level is above normal.');
 
 			const subscriptions = await Subscription.find();
-			const notifications = subscriptions.map((subscription) =>
-				webpush.sendNotification(
-					subscription,
-					'Ammonia level is above normal.'
-				)
-			);
+			const notifications = subscriptions.map(async (subscription) => {
+				try {
+					await webpush.sendNotification(
+						subscription,
+						'Ammonia level is above normal.'
+					);
+				} catch (err) {
+					if (err.statusCode === 410 || err.statusCode === 404) {
+						// The push subscription was not found or has expired.
+						// Remove the subscription from the database.
+						await Subscription.deleteOne({ _id: subscription._id });
+					} else {
+						console.error('Failed to send notification', err);
+					}
+				}
+			});
 
 			await Promise.all(notifications);
 		}

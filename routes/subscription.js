@@ -9,8 +9,6 @@ const vapidKeys = {
 	privateKey: process.env.VAPID_PRIVATE_KEY
 };
 
-console.log('Vapid Public Key:', vapidKeys.publicKey);
-
 webpush.setVapidDetails(
 	'mailto:abdulfahadgo566@gmail.com',
 	vapidKeys.publicKey,
