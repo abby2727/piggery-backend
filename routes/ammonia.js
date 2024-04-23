@@ -36,7 +36,9 @@ router.post('/', async (req, res) => {
 		if (value > 25) {
 			console.log('Ammonia level is above normal.');
 
-			const dateAndTime = moment().format('MMMM Do YYYY, h:mm a');
+			const dateAndTime = moment()
+				.tz('Asia/Manila')
+				.format('MMMM Do YYYY, h:mm a');
 			const message = `Ammonia level is above normal. Date and Time: ${dateAndTime}`;
 
 			const subscriptions = await Subscription.find();
