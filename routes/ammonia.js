@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const moment = require('moment-timezone');
 const webpush = require('web-push');
+const authenticateToken = require('../middleware/authMiddleware');
 
 const Ammonia = require('../models/ammoniaModel');
 const Subscription = require('../models/subscriptionModel');
@@ -27,7 +28,7 @@ router.get('/', async (req, res) => {
 	}
 });
 
-router.post('/', async (req, res) => {
+router.post('/', authenticateToken, async (req, res) => {
 	try {
 		const { value } = req.body;
 		if (!value) res.status(400).json({ message: 'Please provide a value' });
