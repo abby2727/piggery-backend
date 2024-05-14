@@ -9,7 +9,7 @@ const authenticateToken = (req, res, next) => {
 	//* If there is no token, return 401 Unauthorized
 	if (token == null) return res.sendStatus(401);
 
-	//* If the token is not equal to the secret token, return 403 Forbidden
+	//* If the token is incorrect, return 403 Forbidden
 	if (token !== secretToken) return res.sendStatus(403);
 
 	next();
